@@ -2,4 +2,6 @@
 
 # are you sure you want to continue?
 
-# Commited Version
+# Committed Version
+
+# Nowa Eksperymentalna funkcjonalność.
