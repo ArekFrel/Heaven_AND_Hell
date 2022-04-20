@@ -1,7 +1,10 @@
 from datetime import datetime
 
+from pesel import Pesel
+
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import Column, String, Integer, DateTime, Text
+from sqlalchemy import ForeignKey
 
 from faker import Faker
 
@@ -26,11 +29,12 @@ class Student(Base):
         fake = Faker()
         return Student(
             first_name=fake.first_name(),
-            last_name=fake.last_name()
+            last_name=fake.last_name(),
+            PESEL=str(Pesel.generate())
         )
 
 
-def create_fake_students(session, count=0):
+def create_fake_students(session, count=49):
     for _ in range(count):
         session.add(Student.create_fake_student())
         session.commit()
@@ -56,12 +60,16 @@ class Staff(Base):
         return Staff(
             first_name=fake.first_name(),
             last_name=fake.last_name(),
-            phone=fake.phone_number()
+            phone=fake.phone_number(),
+            PESEL=str(Pesel.generate()),
         )
 
 
-def create_fake_teachers(session, count=5):
+def create_fake_teachers(session, count=7):
     for _ in range(count):
         session.add(Staff.create_fake_teacher())
         session.commit()
+
+# class ExamGrades(Base):
+#     __tablename__ = "oceny"
 

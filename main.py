@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from db.session import Session
 from db.model import Student
+from sqlalchemy import text
 
 
 def main():
@@ -11,12 +12,16 @@ def main():
     #     print(imie)
 
     session = Session()
-    result = session.query(Student.first_name)
-    for name in result:
-        print(name[0])
+    result = session.query(Student).filter(text("id=:id")).params(id=5)
+    for student in result:
+        print(student)
 
+    print("-----------------")
 
-
+    sql_statement = text("SELECT * FROM students WHERE id <:max")
+    result = session.query(Student).from_statement(sql_statement).params(max=5)
+    for student in result:
+        print(student)
 
 
 if __name__ == '__main__':
