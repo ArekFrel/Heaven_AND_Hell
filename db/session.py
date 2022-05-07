@@ -1,9 +1,10 @@
-import os
+from credentials import password
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-DB_URI = os.getenv("DB_URI")
-# engine = create_engine("mysql+pymysql://root:magdor@localhost:3306/heaven_and_hell")
-engine = create_engine(DB_URI)
+db_connection_string = f"mysql+pymysql://root:{password}@localhost:3306/heaven_and_hell"
+
+engine = create_engine(db_connection_string)
+
 
 Session = sessionmaker(bind=engine)
