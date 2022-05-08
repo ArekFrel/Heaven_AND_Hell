@@ -1,13 +1,9 @@
 from datetime import datetime
-
 from pesel import Pesel
-
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, String, Integer, DateTime, Float, Text
-from sqlalchemy import ForeignKey, Table
+from sqlalchemy import Column, String, Integer, DateTime, Float
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
-
-
 from faker import Faker
 
 Base = declarative_base()
@@ -32,11 +28,17 @@ class Student(Base):
     @staticmethod
     def create_fake_student():
         fake = Faker()
-        return Student(
-            first_name=fake.first_name(),
-            last_name=fake.last_name(),
-            PESEL=str(Pesel.generate())
+        first_name = fake.first_name()
+        last_name = fake.last_name()
+        pesel = str(Pesel.generate())
+
+        new_student = Student(
+            first_name=first_name,
+            last_name=last_name,
+            PESEL=pesel
         )
+        new_student.email = [Email(e_mail=f'{first_name}{last_name}@sample.com')]
+        return new_student
 
 
 class Email(Base):
@@ -62,7 +64,7 @@ class Staff(Base):
     address = Column(String(100))
 
     admin_dep = relationship('Departments', back_populates='admins', secondary='administrator')
-    courses = relationship('Courses', back_populates='instructors', secondary='course_instructor')
+    courses = relationship('Course', back_populates='instructors', secondary='course_instructor')
 
     def __repr__(self):
         return f'Staff ({self.id}, {self.first_name}, {self.last_name}, {self.PESEL})'
@@ -93,24 +95,24 @@ class Course(Base):
     onsite = relationship('OnsiteCourse', back_populates='course')
     department = relationship('Departments', back_populates='courses')
     course_grades = relationship('Grades', back_populates='course')
-    instructors = relationship(Staff, back_populates='courses', secondary='course_instructor')
+    instructors = relationship('Staff', back_populates='courses', secondary='course_instructor')
 
 
 class OnlineCourse(Base):
     __tablename__ = 'online_course'
-    course_id = Column(Integer, ForeignKey('course.course_id'), primary_key=True)
+    course_id = Column(Integer, ForeignKey('courses.course_id'), primary_key=True)
     url = Column(String(200), nullable=False)
-    course = relationship('Courses', back_populates='online')
+    course = relationship('Course', back_populates='online')
 
 
 class OnsiteCourse(Base):
     __tablename__ = 'onsite_course'
-    course_id = Column(Integer, ForeignKey('course.course_id'), primary_key=True)
+    course_id = Column(Integer, ForeignKey('courses.course_id'), primary_key=True)
     address = Column(String(150), nullable=False)
     days = Column(Integer, nullable=False)
     time = Column(DateTime, nullable=False)
 
-    course = relationship('Courses', back_populates='onsite')
+    course = relationship('Course', back_populates='onsite')
 
 
 class Departments(Base):
@@ -120,7 +122,7 @@ class Departments(Base):
     budget = Column(Float, nullable=True)
     address = Column(String(120), nullable=False)
 
-    courses = relationship('Courses', back_populates='department')
+    courses = relationship('Course', back_populates='department')
     admins = relationship(
         Staff, back_populates='admin_dep', secondary='administrator'
     )
@@ -134,8 +136,8 @@ class Grades(Base):
     grade_id = Column(Integer, primary_key=True)
     student_id = Column(Integer, ForeignKey('students.id'))
     course_id = Column(Integer, ForeignKey('courses.course_id'))
-    student = relationship('Students', back_populates='students_grades')
-    course = relationship('Courses', back_populates='course_grades')
+    student = relationship('Student', back_populates='students_grades')
+    course = relationship('Course', back_populates='course_grades')
 
 
 class Administrator(Base):
@@ -162,6 +164,3 @@ def create_fake_students(session, count=49):
     for _ in range(count):
         session.add(Student.create_fake_student())
         session.commit()
-
-# class ExamGrades(Base):
-#     __tablename__ = "oceny"

@@ -1,4 +1,4 @@
-from credentials import password
+from db.credentials import password
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
